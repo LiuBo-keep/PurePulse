@@ -23,38 +23,121 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.purepulse.model.MonitorData;
 
+/**
+ * PurePulse Desktop Monitor Application.
+ *
+ * <p>
+ * This class represents the main entry point of the PurePulse desktop
+ * monitoring application built using JavaFX.
+ * </p>
+ *
+ * <p>
+ * PurePulse is a lightweight floating system monitoring widget that
+ * continuously displays real-time system statistics in a compact UI.
+ * The application is designed to stay on top of the desktop and
+ * provide quick insight into system performance without opening
+ * heavyweight monitoring tools.
+ * </p>
+ *
+ * <h2>Displayed Metrics</h2>
+ * <ul>
+ *   <li>CPU usage percentage</li>
+ *   <li>Memory usage (used / total)</li>
+ *   <li>Network upload and download speed</li>
+ *   <li>Disk usage percentage</li>
+ * </ul>
+ *
+ * <h2>Application Characteristics</h2>
+ * <ul>
+ *   <li>Always-on-top floating widget</li>
+ *   <li>Minimalist UI design</li>
+ *   <li>Smooth animated progress bars</li>
+ *   <li>System tray integration</li>
+ *   <li>Draggable window</li>
+ *   <li>Right-click to hide window</li>
+ * </ul>
+ *
+ * <p>
+ * Monitoring data is periodically retrieved from {@link MonitorService},
+ * then pushed to the UI using the JavaFX application thread via
+ * {@link Platform#runLater(Runnable)}.
+ * </p>
+ *
+ * <p>
+ * The UI is intentionally compact and optimized for continuous background
+ * monitoring with minimal resource usage.
+ * </p>
+ *
+ * @author aidan.liu
+ * @version 1.0
+ * @since 2026-03-10
+ */
 public class PurePulseApp extends Application {
 
-  // --- 浅色主题颜色定义 ---
+  /**
+   * Monospaced font used for displaying numeric metrics.
+   * Improves readability for values that frequently update.
+   */
   private static final String FONT_MONO = "Consolas, 'Monospace'";
-  private static final String COLOR_BG = "rgba(255, 255, 255, 0.95)"; // 纯白半透明
-  private static final String COLOR_TEXT_MAIN = "#333333";           // 主文字色
 
-  private static final String COLOR_CYAN = "#0091EA";   // 深青色（适配白底）
-  private static final String COLOR_BLUE = "#2979FF";   // 进度条色
-  private static final String COLOR_RED = "#D32F2F";    // 警报红
-  private static final String COLOR_ORANGE = "#E65100"; // 温度色
-  private static final String COLOR_GREEN = "#2E7D32";  // 内存色
-  private static final String COLOR_PURPLE = "#7B1FA2"; // 网络色
-  private static final String COLOR_PINK = "#C2185B";   // 磁盘色
+  /**
+   * Semi-transparent background color of the widget container.
+   */
+  private static final String COLOR_BG = "rgba(255, 255, 255, 0.95)";
+  /**
+   * Primary text color used for general UI labels.
+   */
+  private static final String COLOR_TEXT_MAIN = "#333333";
 
-  // 阈值
+  /**
+   * Accent color definitions used to visually distinguish metrics.
+   */
+  private static final String COLOR_CYAN = "#0091EA";
+  private static final String COLOR_BLUE = "#2979FF";
+  private static final String COLOR_RED = "#D32F2F";
+  private static final String COLOR_GREEN = "#2E7D32";
+  private static final String COLOR_PURPLE = "#7B1FA2";
+  private static final String COLOR_PINK = "#C2185B";
+
+  /**
+   * Threshold values used for warning indicators.
+   * When system metrics exceed these thresholds, the UI may change color
+   * to alert the user of high resource usage.
+   */
   private static final double CPU_THRESHOLD = 80.0;
   private static final double MEM_THRESHOLD = 0.8;
   private static final double DISK_THRESHOLD = 0.9;
-  private static final double TEMP_THRESHOLD = 80.0;
 
-  // UI 组件
+  /**
+   * Service responsible for collecting system performance data.
+   */
   private final MonitorService service = new MonitorService();
+
+  /**
+   * Labels used to display current metric values.
+   */
   private final Label cpuLabel = new Label();
   private final Label memLabel = new Label();
   private final Label netLabel = new Label();
   private final Label diskLabel = new Label();
 
+  /**
+   * Progress bars representing resource utilization visually.
+   */
   private final ProgressBar cpuBar = new ProgressBar(0);
   private final ProgressBar memBar = new ProgressBar(0);
   private final ProgressBar diskBar = new ProgressBar(0);
 
+  /**
+   * Application startup entry point invoked by the JavaFX runtime.
+   *
+   * <p>
+   * Initializes the main layout, configures the window behavior,
+   * enables system tray integration, and starts the monitoring thread.
+   * </p>
+   *
+   * @param stage primary application window
+   */
   @Override
   public void start(Stage stage) {
     Platform.setImplicitExit(false);
@@ -64,6 +147,23 @@ public class PurePulseApp extends Application {
     startMonitorTask();
   }
 
+  /**
+   * Creates and initializes the main UI layout.
+   *
+   * <p>
+   * The layout consists of:
+   * </p>
+   * <ul>
+   *   <li>Custom title bar</li>
+   *   <li>Network statistics</li>
+   *   <li>CPU usage and progress bar</li>
+   *   <li>Memory usage and progress bar</li>
+   *   <li>Disk usage and progress bar</li>
+   * </ul>
+   *
+   * @param stage application window
+   * @return root VBox layout
+   */
   private VBox createMainLayout(Stage stage) {
     // 1. 标题栏 + 最小化按钮
     Label title = new Label("pure pulse");
@@ -119,18 +219,45 @@ public class PurePulseApp extends Application {
     return root;
   }
 
+  /**
+   * Applies standard styling to metric labels.
+   *
+   * @param l     label component
+   * @param color text color used for the metric
+   */
   private void initLabel(Label l, String color) {
     l.setStyle(
         String.format("-fx-font-family: %s; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: %s;", FONT_MONO,
             color));
   }
 
+  /**
+   * Configures a progress bar used for displaying resource usage.
+   *
+   * @param b progress bar instance
+   */
   private void initBar(ProgressBar b) {
     b.setMaxWidth(Double.MAX_VALUE);
     b.setPrefHeight(12);
     b.setStyle("-fx-accent: " + COLOR_BLUE + ";");
   }
 
+  /**
+   * Configures the stage (window) properties.
+   *
+   * <p>
+   * Window features include:
+   * </p>
+   * <ul>
+   *   <li>Transparent stage style</li>
+   *   <li>Always-on-top behavior</li>
+   *   <li>Drag-to-move functionality</li>
+   *   <li>Right-click to hide window</li>
+   * </ul>
+   *
+   * @param stage main application stage
+   * @param root  root layout node
+   */
   private void configureWindow(Stage stage, VBox root) {
     Scene scene = new Scene(root, 260, 240);
     scene.setFill(Color.TRANSPARENT);
@@ -155,6 +282,14 @@ public class PurePulseApp extends Application {
     stage.show();
   }
 
+  /**
+   * Starts a background monitoring loop.
+   *
+   * <p>
+   * A daemon thread continuously collects system metrics from
+   * {@link MonitorService} every two seconds and updates the UI.
+   * </p>
+   */
   private void startMonitorTask() {
     Thread t = new Thread(() -> {
       while (true) {
@@ -170,22 +305,27 @@ public class PurePulseApp extends Application {
     t.start();
   }
 
+  /**
+   * Refreshes the UI using the latest monitoring data.
+   *
+   * @param data latest system monitoring snapshot
+   */
   private void refreshUi(MonitorData data) {
-    netLabel.setText(String.format("NET ↓%s  ↑%s", formatNet(data.downSpeed), formatNet(data.upSpeed)));
+    netLabel.setText(String.format("NET ↓%s  ↑%s", formatNet(data.getDownSpeed()), formatNet(data.getUpSpeed())));
 
-    cpuLabel.setText(String.format("CPU %.1f%%", data.cpuUsage));
-    updateStatus(cpuLabel, cpuBar, data.cpuUsage >= CPU_THRESHOLD, COLOR_CYAN);
+    cpuLabel.setText(String.format("CPU %.1f%%", data.getCpuUsage()));
+    updateStatus(cpuLabel, cpuBar, data.getCpuUsage() >= CPU_THRESHOLD, COLOR_CYAN);
 
-    double memRatio = (double) data.memUsed / Math.max(1, data.memTotal);
-    memLabel.setText(String.format("MEM %d / %d GB", data.memUsed, data.memTotal));
+    double memRatio = (double) data.getMemUsed() / Math.max(1, data.getMemTotal());
+    memLabel.setText(String.format("MEM %d / %d GB", data.getMemUsed(), data.getMemTotal()));
     updateStatus(memLabel, memBar, memRatio >= MEM_THRESHOLD, COLOR_GREEN);
 
-    diskLabel.setText(String.format("DISK %.1f%%", data.diskUsage));
-    updateStatus(diskLabel, diskBar, (data.diskUsage / 100.0) >= DISK_THRESHOLD, COLOR_PINK);
+    diskLabel.setText(String.format("DISK %.1f%%", data.getDiskUsage()));
+    updateStatus(diskLabel, diskBar, (data.getDiskUsage() / 100.0) >= DISK_THRESHOLD, COLOR_PINK);
 
-    smoothUpdate(cpuBar, data.cpuUsage / 100.0);
+    smoothUpdate(cpuBar, data.getCpuUsage() / 100.0);
     smoothUpdate(memBar, memRatio);
-    smoothUpdate(diskBar, data.diskUsage / 100.0);
+    smoothUpdate(diskBar, data.getDiskUsage() / 100.0);
   }
 
   private void updateStatus(Label l, ProgressBar b, boolean isHigh, String normalColor) {
@@ -196,6 +336,12 @@ public class PurePulseApp extends Application {
     b.setStyle("-fx-accent: " + (isHigh ? COLOR_RED : COLOR_BLUE) + ";");
   }
 
+  /**
+   * Formats network speed into a human-readable string.
+   *
+   * @param kbps network speed in kilobytes per second
+   * @return formatted speed string
+   */
   private String formatNet(double kbps) {
     if (kbps < 1024) {
       return String.format("%.0f KB/s", kbps);
@@ -203,10 +349,21 @@ public class PurePulseApp extends Application {
     return String.format("%.1f MB/s", kbps / 1024.0);
   }
 
+  /**
+   * Performs smooth animation when updating progress bar values.
+   *
+   * @param bar   progress bar
+   * @param value new progress value (0.0 - 1.0)
+   */
   private void smoothUpdate(ProgressBar bar, double value) {
     new Timeline(new KeyFrame(Duration.millis(400), new KeyValue(bar.progressProperty(), value))).play();
   }
 
+  /**
+   * Program entry point used when launching from command line.
+   *
+   * @param args runtime arguments
+   */
   public static void main(String[] args) {
     launch(args);
   }
