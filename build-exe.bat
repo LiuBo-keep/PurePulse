@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 setlocal enabledelayedexpansion
 
 :: ==========================================
@@ -9,6 +10,9 @@ set MAIN_CLASS=org.purepulse.PurePulseApp
 set VERSION=1.0.0
 set JAR_NAME=pure-pulse-app-1.0.0.jar
 set ICON_PATH=%CD%\src\main\resources\icon\app-icon.ico
+set MODULE_PATH=D:\java\jdk-21.0.4+7\jmods;target/libs
+set ADD_MODULES=javafx.controls,javafx.fxml,java.base,java.desktop,java.management,jdk.unsupported,java.logging,java.sql
+set JVM_OPTIONS=-Xms20m -Xmx60m
 
 :: ==========================================
 :: 2. 环境清理
@@ -49,8 +53,8 @@ jpackage ^
   --input target ^
   --main-jar %JAR_NAME% ^
   --main-class %MAIN_CLASS% ^
-  --module-path "D:\java\jdk-21.0.4+7\jmods;target/libs" ^
-  --add-modules javafx.controls,javafx.fxml,java.base,java.desktop,java.management,jdk.unsupported,java.logging,java.sql^
+  --module-path "%MODULE_PATH%" ^
+  --add-modules %ADD_MODULES% ^
   --win-shortcut ^
   --win-menu ^
   --win-menu-group "%APP_NAME%" ^
@@ -59,7 +63,7 @@ jpackage ^
   --vendor "Aidan Studio" ^
   --copyright "Copyright 2026" ^
   --description "PurePulseApp" ^
-  --java-options "-Xms20m -Xmx60m" ^
+  --java-options "%JVM_OPTIONS%" ^
   --verbose ^
   --temp temp_build
 
