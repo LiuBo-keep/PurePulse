@@ -50,7 +50,7 @@ jpackage ^
   --main-jar %JAR_NAME% ^
   --main-class %MAIN_CLASS% ^
   --module-path "D:\java\jdk-21.0.4+7\jmods;target/libs" ^
-  --add-modules javafx.controls,javafx.fxml,java.base,java.desktop ^
+  --add-modules javafx.controls,javafx.fxml,java.base,java.desktop,java.management,jdk.unsupported,java.logging,java.sql^
   --win-shortcut ^
   --win-menu ^
   --win-menu-group "%APP_NAME%" ^
@@ -59,6 +59,7 @@ jpackage ^
   --vendor "Aidan Studio" ^
   --copyright "Copyright 2026" ^
   --description "PurePulseApp" ^
+  --java-options "-Xms20m -Xmx60m" ^
   --verbose ^
   --temp temp_build
 
