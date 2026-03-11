@@ -15,6 +15,7 @@ public class MonitorService {
   private final CentralProcessor cpu = hardware.getProcessor();
   private final GlobalMemory memory = hardware.getMemory();
   private long[] prevTicks = cpu.getSystemCpuLoadTicks();
+  private final MonitorData data = new MonitorData();
 
   // 用于网速计算的辅助变量
   private long lastRecv = 0;
@@ -22,22 +23,18 @@ public class MonitorService {
   private long lastTime = System.currentTimeMillis();
 
   public MonitorData collect() {
-    MonitorData data = new MonitorData();
 
     // 1. CPU 使用率
     data.cpuUsage = cpu.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
     prevTicks = cpu.getSystemCpuLoadTicks();
 
-    // 2. CPU 温度
-    data.cpuTemp = hardware.getSensors().getCpuTemperature();
-
-    // 3. 内存统计
+    // 2. 内存统计
     long totalMem = memory.getTotal();
     long availMem = memory.getAvailable();
     data.memTotal = totalMem / 1024 / 1024 / 1024;
     data.memUsed = (totalMem - availMem) / 1024 / 1024 / 1024;
 
-    // 4. 网速计算 (下载 & 上传)
+    // 3. 网速计算 (下载 & 上传)
     List<NetworkIF> networkIFs = hardware.getNetworkIFs();
     long currentRecv = 0;
     long currentSent = 0;
@@ -61,7 +58,7 @@ public class MonitorService {
     lastSent = currentSent;
     lastTime = currentTime;
 
-    // 5. 磁盘统计 (所有驱动器平均占用率)
+    // 4. 磁盘统计 (所有驱动器平均占用率)
     List<OSFileStore> fileStores = systemInfo.getOperatingSystem().getFileSystem().getFileStores();
     long totalDiskSpace = 0;
     long usableDiskSpace = 0;

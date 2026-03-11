@@ -8,7 +8,6 @@ package org.purepulse.model;
 public class MonitorData {
 
   public double cpuUsage;
-  public double cpuTemp;
 
   public long memUsed;
   public long memTotal;
@@ -26,14 +25,6 @@ public class MonitorData {
 
   public void setCpuUsage(double cpuUsage) {
     this.cpuUsage = cpuUsage;
-  }
-
-  public double getCpuTemp() {
-    return cpuTemp;
-  }
-
-  public void setCpuTemp(double cpuTemp) {
-    this.cpuTemp = cpuTemp;
   }
 
   public long getMemUsed() {

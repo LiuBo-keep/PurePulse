@@ -74,6 +74,12 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>org.purepulse.PurePulseApp</mainClass>
+                    <options>
+                        <option>-Xms20m</option>
+                        <option>-Xmx40m</option>
+                        <option>-XX:+UseSerialGC</option>
+                        <option>-XX:MaxMetaspaceSize=32m</option>
+                    </options>
                 </configuration>
             </plugin>
         </plugins>

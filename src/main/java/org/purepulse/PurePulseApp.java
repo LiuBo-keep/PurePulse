@@ -1,5 +1,6 @@
 package org.purepulse;
 
+import java.util.concurrent.TimeUnit;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -46,7 +47,6 @@ public class PurePulseApp extends Application {
   // UI 组件
   private final MonitorService service = new MonitorService();
   private final Label cpuLabel = new Label();
-  private final Label tempLabel = new Label();
   private final Label memLabel = new Label();
   private final Label netLabel = new Label();
   private final Label diskLabel = new Label();
@@ -66,8 +66,8 @@ public class PurePulseApp extends Application {
 
   private VBox createMainLayout(Stage stage) {
     // 1. 标题栏 + 最小化按钮
-    Label title = new Label("JavaPulse");
-    title.setStyle("-fx-text-fill: " + COLOR_TEXT_MAIN + "; -fx-font-size: 16px; -fx-font-weight: 900;");
+    Label title = new Label("pure pulse");
+    title.setStyle("-fx-text-fill: " + COLOR_TEXT_MAIN + "; -fx-font-size: 12px; -fx-font-weight: 900;");
 
     // 最小化符号
     Button btnMin = new Button("—");
@@ -89,7 +89,6 @@ public class PurePulseApp extends Application {
     // 2. 初始化标签
     initLabel(netLabel, COLOR_PURPLE);
     initLabel(cpuLabel, COLOR_CYAN);
-    initLabel(tempLabel, COLOR_ORANGE);
     initLabel(memLabel, COLOR_GREEN);
     initLabel(diskLabel, COLOR_PINK);
 
@@ -98,12 +97,10 @@ public class PurePulseApp extends Application {
     initBar(memBar);
     initBar(diskBar);
 
-    // 4. 指标行（CPU+TEMP并排）
+    // 4. 指标行（CPU）
     HBox cpuLine = new HBox(cpuLabel);
     HBox lineSpacer = new HBox();
     HBox.setHgrow(lineSpacer, Priority.ALWAYS);
-    cpuLine.getChildren().addAll(lineSpacer, tempLabel);
-    cpuLine.setAlignment(Pos.BOTTOM_CENTER);
 
     // --- 组装根容器 ---
     VBox root = new VBox(10);
@@ -130,12 +127,12 @@ public class PurePulseApp extends Application {
 
   private void initBar(ProgressBar b) {
     b.setMaxWidth(Double.MAX_VALUE);
-    b.setPrefHeight(10);
+    b.setPrefHeight(12);
     b.setStyle("-fx-accent: " + COLOR_BLUE + ";");
   }
 
   private void configureWindow(Stage stage, VBox root) {
-    Scene scene = new Scene(root, 200, 240);
+    Scene scene = new Scene(root, 260, 240);
     scene.setFill(Color.TRANSPARENT);
     // 进度条轨道改为浅灰色
     scene.getStylesheets().add("data:text/css," +
@@ -164,7 +161,7 @@ public class PurePulseApp extends Application {
         try {
           MonitorData data = service.collect();
           Platform.runLater(() -> refreshUi(data));
-          Thread.sleep(1000);
+          TimeUnit.SECONDS.sleep(2);
         } catch (Exception ignored) {
         }
       }
@@ -177,7 +174,6 @@ public class PurePulseApp extends Application {
     netLabel.setText(String.format("NET ↓%s  ↑%s", formatNet(data.downSpeed), formatNet(data.upSpeed)));
 
     cpuLabel.setText(String.format("CPU %.1f%%", data.cpuUsage));
-    tempLabel.setText(String.format("%.1f℃", data.cpuTemp));
     updateStatus(cpuLabel, cpuBar, data.cpuUsage >= CPU_THRESHOLD, COLOR_CYAN);
 
     double memRatio = (double) data.memUsed / Math.max(1, data.memTotal);

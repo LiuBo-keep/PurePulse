@@ -6,7 +6,6 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
-import java.net.URL;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
@@ -19,9 +18,7 @@ public class TrayManager {
 
       SystemTray tray = SystemTray.getSystemTray();
       // 建议：给托盘找一个 16x16 的透明 png 图标，BufferedImage 默认为全黑
-      java.awt.Image image = Toolkit.getDefaultToolkit().createImage(
-          new URL("https://cdn-icons-png.flaticon.com/16/1147/1147013.png") // 示例图标
-      );
+      java.awt.Image image = Toolkit.getDefaultToolkit().createImage(TrayManager.class.getResource("/image/tray.png"));
 
       PopupMenu menu = new PopupMenu();
       MenuItem showItem = new MenuItem("Show JavaPulse");
