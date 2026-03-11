@@ -21,7 +21,7 @@ public class TrayManager {
       java.awt.Image image = Toolkit.getDefaultToolkit().createImage(TrayManager.class.getResource("/image/tray.png"));
 
       PopupMenu menu = new PopupMenu();
-      MenuItem showItem = new MenuItem("Show JavaPulse");
+      MenuItem showItem = new MenuItem("Show PurePulse");
       MenuItem exitItem = new MenuItem("Exit");
 
       showItem.addActionListener(e -> Platform.runLater(() -> {
@@ -38,7 +38,7 @@ public class TrayManager {
       menu.addSeparator();
       menu.add(exitItem);
 
-      TrayIcon icon = new TrayIcon(image, "JavaPulse", menu);
+      TrayIcon icon = new TrayIcon(image, "PurePulse", menu);
       icon.setImageAutoSize(true);
       // 双击图标恢复窗口
       icon.addActionListener(e -> Platform.runLater(() -> {
