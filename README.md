@@ -43,9 +43,8 @@ mvn javafx:run
 
 ### 3. 构建可执行包
 
-```bash
-mvn clean package
-
+```text
+双击build-exe.bat
 ```
 
 ---
@@ -70,6 +69,7 @@ PurePulse/
 │   │   ├── java/purepulse/        # 核心逻辑
 │   │   └── resources/             # 图标及资源文件
 ├── pom.xml                        # Maven 配置与 JVM 参数
+├── build-exe.bat                  # 构建可执行包
 └── README.md
 
 ```
